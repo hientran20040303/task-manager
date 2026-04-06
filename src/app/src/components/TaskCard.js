@@ -1,4 +1,4 @@
-'use client'; // Needed for the onClick handler
+'use client';
 
 export default function TaskCard({ task, onToggle, onDelete }) {
   return (
