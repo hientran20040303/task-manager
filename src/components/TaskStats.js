@@ -1,10 +1,16 @@
+// COMPONENT: TaskStats
+// PURPOSE:   Shows the live counts and the clear completed button.
+// TYPE:      Client Component
+// PROPS:     total, active, completed (Numbers), onClear (Function)
+
 'use client';
 
 export default function TaskStats({ total, active, completed, onClear }) {
-  if (total === 0) return null; // Hide if no events exist
+  // If no events exist, we hide the bar entirely.
+  if (total === 0) return null;
 
   return (
-    <div className="flex items-center gap-8 bg-[#1a1a1a] p-4 rounded-xl border border-[#333]">
+    <div className="flex items-center gap-8 bg-[#1a1a1a] p-4 rounded-xl border border-[#333] shadow-lg">
       <div className="flex gap-6">
         <div className="text-center">
           <p className="text-[9px] text-gray-500 uppercase font-black">Total</p>
@@ -19,13 +25,7 @@ export default function TaskStats({ total, active, completed, onClear }) {
           <p className="text-lg font-black text-white">{completed}</p>
         </div>
       </div>
-      
-      <button 
-        onClick={onClear}
-        className="text-[9px] bg-red-950 text-red-500 border border-red-900 px-3 py-1 rounded-md font-black uppercase hover:bg-red-500 hover:text-white transition-all"
-      >
-        Clear All
-      </button>
+      <button onClick={onClear} className="text-[9px] bg-red-950 text-red-500 border border-red-900 px-3 py-1 rounded-md font-black uppercase hover:bg-red-500 hover:text-white transition-all">Clear Finalized</button>
     </div>
   );
 }

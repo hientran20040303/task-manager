@@ -1,9 +1,3 @@
-
-// COMPONENT: HomePage
-// PURPOSE: The main landing page of the application. 
-//          Acts as a wrapper for the TaskBoard.
-// TYPE: Server Component (Default)
-
 import TaskBoard from '@/components/TaskBoard';
 
 export default function HomePage() {
