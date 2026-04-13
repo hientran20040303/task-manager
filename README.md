@@ -1,3 +1,29 @@
+## Project Overview
+This is a professional Event Planner built with **Next.js 16**, **React 19**, and **Tailwind CSS v4**. It allows users to track events they are interested in, set research priorities, and manage their schedule with full persistence.
+
+## Tech Stack
+- **Framework:** Next.js
+- **Library:** React 19
+- **Styling:** Tailwind CSS v4
+- **Persistence:** Browser LocalStorage
+
+## AI Usage Log
+
+### 1. Scaffolding & Component Logic
+- **What I asked:** I provided the assignment requirements and asked for a step-by-step guide on the logical development order (which components to build first).
+- **What I got:** A structured roadmap providing the order of which component should be written first.
+- **What I changed:** I followed the order but customized the data structures to fit the Event Planner idea.
+
+### 2. Date Formatting Logic
+- **What I asked:** "How can I make an input automatically add dashes like mm-dd-yyyy as the user types only numbers?"
+- **What I got:** A Javascript regex function.
+- **What I learned:** I learned how to use `.replace(/\D/g, '')` to strip away non numbers so the formatting logic doesn't break if a user accidentally hits a letter.
+
+### 3. Debugging TypeErrors
+- **What I asked:** "My app crashes with 'Cannot read properties of undefined (reading name)'."
+- **What I learned:** AI explained that my `localStorage` had old data from a previous version. I learned to use "Lazy Initializers" and "Guard Clauses" (`if (!event) return null`) to make my code more stable and prevent crashes.
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
