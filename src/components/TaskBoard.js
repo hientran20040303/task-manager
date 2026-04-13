@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import TaskStats from './TaskStats';
-import AddTaskForm from '../src/components/AddTaskForm';
+import AddTaskForm from './AddTaskForm';
 import TaskList from './TaskList';
 
 export default function TaskBoard() {

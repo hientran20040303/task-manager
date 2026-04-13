@@ -16,7 +16,7 @@ export default function AddTaskForm({ onAdd }) {
     // Validation: Ensures no empty strings or just whitespace are added.
     if (!text.trim()) return;
 
-    onAdd(text);
+    onAdd(text);S
     setText(''); // Reset input field after success
   };
 
