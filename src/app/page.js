@@ -1,17 +1,20 @@
 
 // COMPONENT: HomePage
-// PURPOSE: The entry point for the route. Acts as a static 
-//          Server Component wrapper for our interactive board.
-// TYPE: Server Component (Default).
+// PURPOSE: The main landing page of the application. 
+//          Acts as a wrapper for the TaskBoard.
+// TYPE: Server Component (Default)
+
 import TaskBoard from '@/components/TaskBoard';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen p-4 sm:p-8">
-      {/* Background Decorative Element */}
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-green-900/20 via-slate-950 to-slate-950"></div>
+    <main className="min-h-screen p-4 md:p-12 flex justify-center">
+      {/* Background decoration using Tailwind classes */}
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-950 to-black"></div>
       
-      <TaskBoard />
+      <div className="w-full max-w-3xl">
+        <TaskBoard />
+      </div>
     </main>
   );
 }

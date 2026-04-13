@@ -1,42 +1,93 @@
-// COMPONENT: TaskCard
-// PURPOSE: Renders an individual planning item with action buttons.
-// TYPE: Client Component (Requires Interactivity).
 'use client';
+import { useState } from 'react';
 
-export default function TaskCard({ task, onToggle, onDelete }) {
+export default function TaskCard({ event, onUpdate, onDelete }) {
+  // Memory to check if we are currently editing this card
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Memory to hold the "temporary" changes before we save them
+  const [editData, setEditData] = useState({ ...event });
+
+  // Function to save the changes
+  const handleSave = () => {
+    onUpdate(event.id, editData);
+    setIsEditing(false);
+  };
+
   return (
-    <div className={`group flex items-center justify-between p-4 mb-3 rounded-lg border transition-all ${
-      task.done 
-        ? 'bg-slate-900/50 border-slate-800 opacity-60' 
-        : 'bg-slate-800 border-slate-700 hover:border-green-500'
+    <div className={`p-6 rounded-2xl border transition-all ${
+      event.done ? 'bg-black border-[#333] opacity-50' : 'bg-[#1a1a1a] border-[#333] hover:border-[#ff6600]'
     }`}>
-      <div className="flex items-center gap-4">
-        {/* Checkbox: Fires onToggle back to parent TaskBoard */}
-        <input 
-          type="checkbox" 
-          checked={task.done}
-          onChange={() => onToggle(task.id)}
-          className="w-5 h-5 accent-green-500 cursor-pointer"
-        />
-        <div>
-          {/* Conditional Rendering for CSS: Applies line-through if done */}
-          <p className={`font-medium transition-all ${task.done ? 'line-through text-slate-500' : 'text-slate-100'}`}>
-            {task.title}
-          </p>
-          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">
-            Match Priority: High
-          </span>
+      
+      {isEditing ? (
+        /* --- EDIT MODE VIEW --- */
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <input 
+              className="bg-black border border-[#ff6600] p-2 rounded text-sm outline-none"
+              value={editData.name} 
+              onChange={(e) => setEditData({...editData, name: e.target.value})}
+            />
+            <input 
+              className="bg-black border border-[#ff6600] p-2 rounded text-sm outline-none"
+              value={editData.date} 
+              onChange={(e) => setEditData({...editData, date: e.target.value})}
+            />
+            <select 
+              className="bg-black border border-[#ff6600] p-2 rounded text-sm outline-none"
+              value={editData.priority} 
+              onChange={(e) => setEditData({...editData, priority: e.target.value})}
+            >
+              <option>High</option><option>Medium</option><option>Low</option>
+            </select>
+            <select 
+              className="bg-black border border-[#ff6600] p-2 rounded text-sm outline-none"
+              value={editData.size} 
+              onChange={(e) => setEditData({...editData, size: e.target.value})}
+            >
+              <option>Large</option><option>Medium</option><option>Small</option>
+            </select>
+          </div>
+          <button onClick={handleSave} className="w-full bg-[#ff6600] text-black font-bold py-2 rounded text-xs uppercase">
+            Save Changes
+          </button>
         </div>
-      </div>
+      ) : (
+        /* --- NORMAL VIEW --- */
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <h3 className={`text-2xl font-black uppercase italic ${event.done ? 'line-through text-gray-600' : 'text-white'}`}>
+              {event.name}
+            </h3>
+            <div className="flex gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              <span>📅 {event.date}</span>
+              <span>🔥 {event.priority}</span>
+              <span>📏 {event.size}</span>
+            </div>
+          </div>
 
-      {/* Delete button: Only visible on hover for a cleaner "Professional" design */}
-      <button 
-        onClick={() => onDelete(task.id)}
-        className="text-slate-500 hover:text-red-500 transition-colors p-2"
-        aria-label="Delete Task"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-      </button>
+          <div className="flex flex-col items-end gap-4">
+            {/* Right-aligned Status Dropdown */}
+            <select 
+              value={event.done ? 'done' : 'active'}
+              onChange={(e) => onUpdate(event.id, { done: e.target.value === 'done' })}
+              className="bg-black border border-[#333] text-[10px] font-bold uppercase p-2 text-[#ff6600] outline-none"
+            >
+              <option value="active">Active</option>
+              <option value="done">Done</option>
+            </select>
+
+            <div className="flex gap-4">
+              <button onClick={() => setIsEditing(true)} className="text-gray-500 hover:text-white text-[10px] font-bold uppercase transition-colors">
+                Edit
+              </button>
+              <button onClick={() => onDelete(event.id)} className="text-gray-500 hover:text-white text-[10px] font-bold uppercase transition-colors">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

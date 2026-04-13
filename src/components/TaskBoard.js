@@ -1,123 +1,110 @@
 // COMPONENT: TaskBoard
-// PURPOSE: Acts as the "Source of Truth" for the Match Day Planner.
-//          It manages the state of all match tasks, handles 
-//          persistence via localStorage, and distributes data.
-// TYPE: Client Component ('use client') - Required for State & Effects.
+// PURPOSE: This is the "Central Brain" of your app. 
+//          It holds the list of events and decides what to show.
+// TYPE: Client Component (It needs memory/state)
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import TaskStats from './TaskStats';
 import AddTaskForm from './AddTaskForm';
 import TaskList from './TaskList';
+import TaskStats from './TaskStats';
 
 export default function TaskBoard() {
-  // ── STATE DECLARATIONS ──────────────────────────────
-  // Lazy initializer: We use a function inside useState so this logic 
-  // only runs once during the initial mount.
-  // The 'typeof window' guard is critical for Next.js because this 
-  // component pre-renders on the server where 'window' doesn't exist.
-  const [tasks, setTasks] = useState(() => {
-    if (typeof window === 'undefined') return [];
-    const saved = localStorage.getItem('world-cup-tasks');
-    return saved ? JSON.parse(saved) : [];
+  // Memory (State) 
+  // Persist on refresh
+  // Check the browser's "LocalStorage" when the app first opens
+  const [events, setEvents] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('my-event-plan');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
   });
 
-  // Filter state: Tracks if we are viewing 'all', 'active', or 'done'.
-  // We keep this separate because changing the filter shouldn't 
-  // modify the actual task data, only how we view it.
   const [filter, setFilter] = useState('all');
 
-  // ── EFFECTS ─────────────────────────────────────────
-  // This Effect syncs our React state to the browser's localStorage.
-  // Dependency Array [tasks]: React will only run this when the task
-  // list changes, making it efficient.
+  // Saving Effect
+  // Every time our list changes, we save it to the browser automatically
   useEffect(() => {
-    localStorage.setItem('world-cup-tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    localStorage.setItem('my-event-plan', JSON.stringify(events));
+  }, [events]);
 
-  // ── DERIVED VALUES ──────────────────────────────────
-  // We do NOT store 'visibleTasks' or 'counts' in state. Why?
-  // Because they can be calculated instantly from 'tasks'. 
-  // This prevents "sync bugs" where state variables get out of whack.
-  const completedCount = tasks.filter(t => t.done).length;
-  const activeCount = tasks.length - completedCount;
+  // Logic Functions (Handlers)
 
-  const visibleTasks = tasks.filter(task => {
-    if (filter === 'done') return task.done;
-    if (filter === 'active') return !task.done;
-    return true; // 'all'
+  // Add a brand new event
+  function addEvent(name, date, priority, size) {
+    const newEntry = {
+      id: crypto.randomUUID(), // Gives every event a unique ID "fingerprint"
+      name,
+      date,
+      priority,
+      size,
+      done: false // New events start as "Active"
+    };
+    // Create a NEW array with the new entry. Never "push" directly in React.
+    setEvents([...events, newEntry]);
+  }
+
+  // Update an existing event
+  function updateEvent(id, updatedData) {
+    setEvents(events.map(e => e.id === id ? { ...e, ...updatedData } : e));
+  }
+
+  // Delete an event
+  function deleteEvent(id) {
+    setEvents(events.filter(e => e.id !== id));
+  }
+
+  // Clear completed
+  function clearCompleted() {
+    setEvents(events.filter(e => !e.done));
+  }
+
+  // Live Calculations (Derived Values)
+  // Stats bar display
+  const total = events.length;
+  const active = events.filter(e => !e.done).length;
+  const completed = total - active;
+
+  // Filter the list based on which tab is clicked
+  const visibleEvents = events.filter(e => {
+    if (filter === 'done') return e.done;
+    if (filter === 'active') return !e.done;
+    return true;
   });
 
-  // ── HANDLERS (Callback Logic) ───────────────────────
-  // IMMUTABILITY RULE: We never use tasks.push() or tasks[i] = x.
-  // We use .map(), .filter(), and [...] spread to return NEW arrays.
-  // This tells React the memory reference changed, triggering a re-render.
-
-  function addTask(title) {
-    const newTask = {
-      id: crypto.randomUUID(), // Generates a unique, stable key
-      title: title,
-      done: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
-    setTasks([...tasks, newTask]);
-  }
-
-  function toggleTask(id) {
-    setTasks(tasks.map(t => 
-      t.id === id ? { ...t, done: !t.done } : t
-    ));
-  }
-
-  function deleteTask(id) {
-    setTasks(tasks.filter(t => t.id !== id));
-  }
-
-  function clearCompleted() {
-    setTasks(tasks.filter(t => !t.done));
-  }
-
   return (
-    <div className="max-w-2xl mx-auto bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden mt-10">
-      <div className="p-6 bg-linear-to-r from-green-800 to-slate-900 border-b border-slate-700">
-        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
-          Match Day Strategy <span className="text-yellow-500">2026</span>
-        </h2>
-        <p className="text-slate-400 text-xs mt-1">Organize your betting research and match analysis</p>
+    <div className="max-w-4xl mx-auto p-8 space-y-10">
+      <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-[#333] pb-8">
+        <h1 className="text-5xl font-black uppercase italic tracking-tighter text-[#ff6600]">
+          Event Planner
+        </h1>
+        <TaskStats total={total} active={active} completed={completed} onClear={clearCompleted} />
+      </header>
+
+      <AddTaskForm onAdd={addEvent} />
+
+      {/* Filter Tabs */}
+      <div className="flex gap-8 border-b border-[#333]">
+        {['all', 'active', 'done'].map((f) => (
+          <button 
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`pb-3 text-xs font-bold uppercase tracking-widest transition-all ${
+              filter === f ? 'text-[#ff6600] border-b-2 border-[#ff6600]' : 'text-gray-500 hover:text-white'
+            }`}
+          >
+            {f}
+          </button>
+        ))}
       </div>
 
-      <div className="p-6">
-        <AddTaskForm onAdd={addTask} />
-        
-        <TaskStats 
-          total={tasks.length} 
-          completed={completedCount} 
-          active={activeCount} 
-          onClear={clearCompleted}
-        />
-
-        {/* Filter Bar */}
-        <div className="flex gap-2 mb-6">
-          {['all', 'active', 'done'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase transition-all
-                ${filter === f 
-                  ? 'bg-yellow-500 text-slate-900' 
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
-        <TaskList 
-          tasks={visibleTasks} 
-          onToggle={toggleTask} 
-          onDelete={deleteTask} 
-        />
-      </div>
+      <TaskList 
+        events={visibleEvents} 
+        onUpdate={updateEvent} 
+        onDelete={deleteEvent} 
+      />
     </div>
   );
 }
